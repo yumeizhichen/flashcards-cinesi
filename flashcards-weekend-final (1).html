@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard Cinesi - Cosa hai fatto questo weekend?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .flashcard-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #E3F2FD;
+            min-height: 100vh;
+        }
+
+        .flashcard-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .flashcard-header h2 {
+            font-size: 18px;
+            color: #999;
+            margin-bottom: 8px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .flashcard-header p {
+            font-size: 32px;
+            color: #FF1744;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .flashcard-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+
+        .tab-btn:hover {
+            border-color: #FF1744;
+            color: #FF1744;
+        }
+
+        .tab-btn.active {
+            background: #FF1744;
+            color: white;
+            border-color: #FF1744;
+        }
+
+        .flashcard-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #0171d3;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-weight: 700;
+            color: white;
+            font-size: 18px;
+        }
+
+        .stat-label {
+            color: white;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        .flashcard-wrapper {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+            touch-action: pan-y;
+        }
+
+        .flashcard {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #FFFEF0;
+            border: 2px solid #FF1744;
+            border-radius: 15px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .flashcard:hover {
+            box-shadow: 0 4px 12px rgba(255, 23, 68, 0.2);
+        }
+
+        .flashcard.flipped {
+            background: #FFFEF0;
+            border-color: #FF9100;
+        }
+
+        .flashcard-front {
+            text-align: center;
+        }
+
+        .flashcard-italian {
+            font-size: 50px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        .flashcard-hint {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .flashcard-back {
+            text-align: center;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .flashcard-chinese-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .flashcard-pinyin {
+            font-size: 50px;
+            color: #666;
+            font-style: italic;
+            order: -1;
+            line-height: 1.2;
+        }
+
+        .flashcard-chinese {
+            font-size: 100px;
+            font-weight: 700;
+            color: #FF1744;
+            line-height: 1.2;
+            margin-top: 10px;
+            font-family: 'SimSun', 'Song', serif;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #FF1744;
+            transition: width 0.3s ease;
+        }
+
+        .flashcard-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .btn-no {
+            background: #FF5252;
+        }
+
+        .btn-no:hover {
+            background: #FF1744;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 23, 68, 0.3);
+        }
+
+        .btn-yes {
+            background: #4CAF50;
+        }
+
+        .btn-yes:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .swipe-hint {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        .completion-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .completion-screen.show {
+            display: block;
+        }
+
+        .completion-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .completion-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .completion-stats {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .completion-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .completion-stat:last-child {
+            border-bottom: none;
+        }
+
+        .completion-stat-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .completion-stat-value {
+            color: #FF1744;
+            font-weight: 700;
+        }
+
+        .completion-message {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .completion-buttons {
+            display: flex;
+            gap: 12px;
+            flex-direction: column;
+        }
+
+        .btn-primary {
+            padding: 12px;
+            background: #FF1744;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #FF5252;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            padding: 12px;
+            background: white;
+            color: #FF1744;
+            border: 2px solid #FF1744;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #FFF3E0;
+        }
+
+
+
+        @media (max-width: 600px) {
+            .flashcard-container {
+                padding: 15px;
+            }
+
+            .flashcard-header h2 {
+                font-size: 16px;
+            }
+
+            .flashcard-header p {
+                font-size: 24px;
+            }
+
+            .flashcard {
+                padding: 20px;
+            }
+
+            .flashcard-italian {
+                font-size: 28px;
+            }
+
+            .flashcard-chinese {
+                font-size: 40px;
+            }
+
+            .flashcard-pinyin {
+                font-size: 16px;
+            }
+
+            .flashcard-wrapper {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="flashcard-container">
+        <div class="flashcard-header">
+            <h2>Cina Con Meizhi</h2>
+            <p>Cosa hai fatto questo weekend?</p>
+        </div>
+
+        <div class="flashcard-tabs" id="tabs"></div>
+
+        <div class="flashcard-stats">
+            <div class="stat-item">
+                <div class="stat-number" id="currentNum">1</div>
+                <div class="stat-label">Attuale</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalNum">0</div>
+                <div class="stat-label">Totale</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="wrongNum">0</div>
+                <div class="stat-label">Sbagliate</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div id="studyScreen">
+            <div class="swipe-hint">Scorri a sinistra (Non lo so) o a destra (Lo so)</div>
+            
+            <div class="flashcard-wrapper" id="cardWrapper">
+                <div class="flashcard" id="card">
+                    <div class="flashcard-front" id="cardFront">
+                        <div class="flashcard-italian" id="cardItalian"></div>
+                        <div class="flashcard-hint">Tocca per vedere la traduzione</div>
+                    </div>
+                    <div class="flashcard-back" id="cardBack" style="display: none;">
+                        <div class="flashcard-chinese-container">
+                            <div class="flashcard-pinyin" id="cardPinyin"></div>
+                            <div class="flashcard-chinese" id="cardChinese"></div>
+                        </div>
+                        <div class="flashcard-hint">Tocca per vedere la traduzione</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flashcard-actions">
+                <button class="action-btn btn-no" id="btnNo">❌ Non lo so</button>
+                <button class="action-btn btn-yes" id="btnYes">✓ Lo so</button>
+            </div>
+        </div>
+
+        <div class="completion-screen" id="completionScreen">
+            <div class="completion-icon">✨</div>
+            <div class="completion-title">Completato!</div>
+            
+            <div class="completion-stats">
+                <div class="completion-stat">
+                    <span class="completion-stat-label">Carte studiate</span>
+                    <span class="completion-stat-value" id="completeTotal">0</span>
+                </div>
+                <div class="completion-stat">
+                    <span class="completion-stat-label">Risposte corrette</span>
+                    <span class="completion-stat-value" id="completeCorrect">0</span>
+                </div>
+                <div class="completion-stat">
+                    <span class="completion-stat-label">Percentuale</span>
+                    <span class="completion-stat-value" id="completePercentage">0%</span>
+                </div>
+            </div>
+
+            <div class="completion-message" id="completionMessage"></div>
+
+            <div class="completion-buttons">
+                <button class="btn-primary" id="btnRepeat">Ripeti questa categoria</button>
+                <button class="btn-secondary" id="btnReviewWrong" style="display: none;">Ripassa parole sbagliate</button>
+                <button class="btn-secondary" id="btnHome">Torna alle categorie</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const flashcardsData = {
+            categories: [
+                {
+                    id: "dialog1",
+                    title: "Dialogo 1",
+                    cards: [
+                        { italian: "weekend", chinese: "周末", pinyin: "zhōu mò" },
+                        { italian: "al mare", chinese: "海边", pinyin: "hǎi biān" },
+                        { italian: "con", chinese: "跟", pinyin: "gēn" },
+                        { italian: "insieme", chinese: "一起", pinyin: "yī qǐ" },
+                        { italian: "centro (città)", chinese: "市中心", pinyin: "shì zhōng xīn" },
+                        { italian: "fare shopping", chinese: "逛街", pinyin: "guàng jiē" },
+                        { italian: "comprare", chinese: "买", pinyin: "mǎi" },
+                        { italian: "molti/e", chinese: "很多", pinyin: "hěn duō" },
+                        { italian: "vestiti", chinese: "衣服", pinyin: "yī fu" },
+                        { italian: "sciare", chinese: "滑雪", pinyin: "huá xuě" },
+                        { italian: "fare picnic", chinese: "野餐", pinyin: "yě cān" },
+                        { italian: "fare trekking", chinese: "徒步", pinyin: "tú bù" },
+                        { italian: "vedere una mostra", chinese: "看展览", pinyin: "kàn zhǎn lǎn" },
+                        { italian: "vedere un concerto/spettacolo", chinese: "看演出", pinyin: "kàn yǎn chū" },
+                        { italian: "fare un giro ai mercatini", chinese: "逛集市", pinyin: "guàng jí shì" }
+                    ]
+                },
+                {
+                    id: "dialog2",
+                    title: "Dialogo 2",
+                    cards: [
+                        { italian: "in macchina", chinese: "开车", pinyin: "kāi chē" },
+                        { italian: "sì", chinese: "对", pinyin: "duì" },
+                        { italian: "siccome, dato che", chinese: "因为", pinyin: "yīn wèi" },
+                        { italian: "quindi", chinese: "所以", pinyin: "suǒ yǐ" },
+                        { italian: "lontano", chinese: "远", pinyin: "yuǎn" },
+                        { italian: "già (presto)", chinese: "就", pinyin: "jiù" },
+                        { italian: "partire", chinese: "出发", pinyin: "chū fā" },
+                        { italian: "perché...?", chinese: "为什么", pinyin: "wèi shén me" }
+                    ]
+                },
+                {
+                    id: "testo3",
+                    title: "Testo 3",
+                    cards: [
+                        { italian: "lavoro/lavorare", chinese: "工作", pinyin: "gōng zuò" },
+                        { italian: "troppo ...", chinese: "太...了", pinyin: "tài ... le" },
+                        { italian: "stanco", chinese: "累", pinyin: "lèi" },
+                        { italian: "non (passato prossimo)", chinese: "没", pinyin: "méi" },
+                        { italian: "ieri", chinese: "昨天", pinyin: "zuó tiān" },
+                        { italian: "piace/piacciono", chinese: "喜欢", pinyin: "xǐ huān" },
+                        { italian: "cibo cinese", chinese: "中国菜", pinyin: "zhōng guó cài" }
+                    ]
+                }
+            ]
+        };
+
+        let state = {
+            currentCategory: "dialog1",
+            currentCardIndex: 0,
+            cards: [],
+            isFlipped: false,
+            wrongCards: [],
+            isReviewMode: false,
+            progress: {},
+            touchStartX: 0,
+            touchEndX: 0
+        };
+
+        function init() {
+            loadProgress();
+            renderTabs();
+            loadCategory("dialog1");
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem("flashcard_progress_weekend");
+            state.progress = saved ? JSON.parse(saved) : {};
+        }
+
+        function saveProgress() {
+            localStorage.setItem("flashcard_progress_weekend", JSON.stringify(state.progress));
+        }
+
+        function renderTabs() {
+            const tabsContainer = document.getElementById("tabs");
+            tabsContainer.innerHTML = "";
+            
+            flashcardsData.categories.forEach(cat => {
+                const btn = document.createElement("button");
+                btn.className = `tab-btn ${cat.id === state.currentCategory ? "active" : ""}`;
+                btn.textContent = cat.title;
+                btn.onclick = () => loadCategory(cat.id);
+                tabsContainer.appendChild(btn);
+            });
+        }
+
+        function loadCategory(categoryId) {
+            state.currentCategory = categoryId;
+            state.currentCardIndex = 0;
+            state.isFlipped = false;
+            state.wrongCards = [];
+            state.isReviewMode = false;
+            
+            const category = flashcardsData.categories.find(c => c.id === categoryId);
+            state.cards = shuffleArray([...category.cards]);
+            
+            renderTabs();
+            showStudyScreen();
+            renderCard();
+            updateStats();
+        }
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function renderCard() {
+            const card = state.cards[state.currentCardIndex];
+            document.getElementById("cardItalian").textContent = card.italian;
+            document.getElementById("cardChinese").textContent = card.chinese;
+            document.getElementById("cardPinyin").textContent = card.pinyin;
+            
+            const cardEl = document.getElementById("card");
+            cardEl.classList.remove("flipped");
+            state.isFlipped = false;
+            
+            document.getElementById("cardFront").style.display = "block";
+            document.getElementById("cardBack").style.display = "none";
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById("currentNum").textContent = state.currentCardIndex + 1;
+            document.getElementById("totalNum").textContent = state.cards.length;
+            document.getElementById("wrongNum").textContent = state.wrongCards.length;
+            
+            const progress = (state.currentCardIndex / state.cards.length) * 100;
+            document.getElementById("progressFill").style.width = progress + "%";
+        }
+
+        function flipCard() {
+            state.isFlipped = !state.isFlipped;
+            const cardEl = document.getElementById("card");
+            const front = document.getElementById("cardFront");
+            const back = document.getElementById("cardBack");
+            
+            if (state.isFlipped) {
+                cardEl.classList.add("flipped");
+                front.style.display = "none";
+                back.style.display = "flex";
+            } else {
+                cardEl.classList.remove("flipped");
+                front.style.display = "block";
+                back.style.display = "none";
+            }
+        }
+
+        function nextCard(correct) {
+            if (!correct) {
+                state.wrongCards.push(state.cards[state.currentCardIndex]);
+            }
+            
+            if (state.currentCardIndex < state.cards.length - 1) {
+                state.currentCardIndex++;
+                renderCard();
+            } else {
+                showCompletion();
+            }
+        }
+
+        function showCompletion() {
+            const total = state.cards.length;
+            const correct = total - state.wrongCards.length;
+            const percentage = Math.round((correct / total) * 100);
+            
+            document.getElementById("completeTotal").textContent = total;
+            document.getElementById("completeCorrect").textContent = correct;
+            document.getElementById("completePercentage").textContent = percentage + "%";
+            
+            let message = "";
+            if (percentage >= 80) {
+                message = "🎉 Ottimo lavoro! Continua così!";
+            } else if (percentage >= 50) {
+                message = "👍 Buon lavoro! Continua a esercitarti.";
+            } else {
+                message = "💪 Continua a studiare, migliorerai!";
+            }
+            document.getElementById("completionMessage").textContent = message;
+            
+            const category = state.currentCategory;
+            state.progress[category] = Math.max(state.progress[category] || 0, correct);
+            saveProgress();
+            
+            const reviewBtn = document.getElementById("btnReviewWrong");
+            if (state.wrongCards.length > 0 && !state.isReviewMode) {
+                reviewBtn.style.display = "block";
+            } else {
+                reviewBtn.style.display = "none";
+            }
+            
+            showCompletionScreen();
+        }
+
+        function showStudyScreen() {
+            document.getElementById("studyScreen").style.display = "block";
+            document.getElementById("completionScreen").classList.remove("show");
+        }
+
+        function showCompletionScreen() {
+            document.getElementById("studyScreen").style.display = "none";
+            document.getElementById("completionScreen").classList.add("show");
+        }
+
+        document.getElementById("card").addEventListener("click", flipCard);
+        document.getElementById("btnYes").addEventListener("click", () => nextCard(true));
+        document.getElementById("btnNo").addEventListener("click", () => nextCard(false));
+        document.getElementById("btnRepeat").addEventListener("click", () => loadCategory(state.currentCategory));
+        document.getElementById("btnReviewWrong").addEventListener("click", () => {
+            state.cards = shuffleArray([...state.wrongCards]);
+            state.currentCardIndex = 0;
+            state.wrongCards = [];
+            state.isReviewMode = true;
+            state.isFlipped = false;
+            showStudyScreen();
+            renderCard();
+        });
+        document.getElementById("btnHome").addEventListener("click", () => {
+            loadCategory(state.currentCategory);
+        });
+
+        const cardWrapper = document.getElementById("cardWrapper");
+        cardWrapper.addEventListener("touchstart", (e) => {
+            state.touchStartX = e.changedTouches[0].screenX;
+        }, false);
+        cardWrapper.addEventListener("touchend", (e) => {
+            state.touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+
+        function handleSwipe() {
+            const diff = state.touchStartX - state.touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    nextCard(false);
+                } else {
+                    nextCard(true);
+                }
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
